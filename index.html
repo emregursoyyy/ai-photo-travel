@@ -59,15 +59,16 @@
 <body>
     <div class="loading">
         <h1>✈️ AI Photo Travel</h1>
-        <p>Yönlendiriliyor...</p>
+        <p>Uygulama yükleniyor...</p>
         <p><a href="ai-photo-editor.html" style="color: white;">Buraya tıklayın</a></p>
     </div>
     
     <script>
-        // Fallback redirect
-        setTimeout(() => {
-            window.location.href = 'ai-photo-editor.html';
-        }, 1000);
+        // Server-side redirect kullanılıyor (_redirects dosyası)
+        // Fallback sadece client-side routing için
+        if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
+            window.location.replace('ai-photo-editor.html');
+        }
     </script>
 </body>
 </html>

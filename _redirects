@@ -1,6 +1,7 @@
 # Netlify redirects file
-# Redirect all routes to index page for SPA behavior
-/*    /ai-photo-editor.html   200
+# Redirect all routes to main app for SPA behavior
+/    /ai-photo-editor.html   200
+/index.html    /ai-photo-editor.html   301
 
 # API proxy to avoid CORS issues (if needed)
 /api/*  https://image.pollinations.ai/:splat  200
