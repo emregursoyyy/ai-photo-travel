@@ -171,6 +171,19 @@ async function removeBackgroundHuggingFace(imageFile, apiKey) {
 
 
 // Main Serverless Function Handler
+// Handle CORS preflight requests
+export async function onRequestOptions(context) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
+
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
@@ -179,7 +192,14 @@ export async function onRequestPost(context) {
     const provider = formData.get('provider');
 
     if (!imageFile) {
-      return new Response('Image file not found in form data.', { status: 400 });
+      return new Response('Image file not found in form data.', { 
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
 
     // Handle specific provider requests
@@ -188,29 +208,62 @@ export async function onRequestPost(context) {
       switch (provider) {
         case 'replicate-rmbg2':
           if (!env.REPLICATE_API_TOKEN) {
-            return new Response('Replicate API token not configured', { status: 500 });
+            return new Response('Replicate API token not configured', { 
+              status: 500,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type'
+              }
+            });
           }
           resultBlob = await removeBackgroundReplicate(imageFile, env.REPLICATE_API_TOKEN, 'rmbg-2.0');
           break;
         case 'replicate-sam2':
           if (!env.REPLICATE_API_TOKEN) {
-            return new Response('Replicate API token not configured', { status: 500 });
+            return new Response('Replicate API token not configured', { 
+              status: 500,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type'
+              }
+            });
           }
           resultBlob = await removeBackgroundReplicate(imageFile, env.REPLICATE_API_TOKEN, 'sam2');
           break;
         case 'replicate-birefnet':
           if (!env.REPLICATE_API_TOKEN) {
-            return new Response('Replicate API token not configured', { status: 500 });
+            return new Response('Replicate API token not configured', { 
+              status: 500,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type'
+              }
+            });
           }
           resultBlob = await removeBackgroundReplicate(imageFile, env.REPLICATE_API_TOKEN, 'birefnet');
           break;
         default:
-          return new Response('Unknown provider specified', { status: 400 });
+          return new Response('Unknown provider specified', { 
+            status: 400,
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type'
+            }
+          });
       }
       
       return new Response(resultBlob, {
         status: 200,
-        headers: { 'Content-Type': 'image/png' }
+        headers: { 
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
       });
     }
 
@@ -234,7 +287,12 @@ export async function onRequestPost(context) {
           // Return the successful result immediately
           return new Response(resultBlob, {
             status: 200,
-            headers: { 'Content-Type': 'image/png' }
+            headers: { 
+              'Content-Type': 'image/png',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type'
+            }
           });
         } catch (error) {
           console.error(`${provider.name} failed:`, error.message);
@@ -246,10 +304,24 @@ export async function onRequestPost(context) {
     }
 
     // If all providers fail
-    return new Response('All background removal services failed. Please try again later.', { status: 500 });
+    return new Response('All background removal services failed. Please try again later.', { 
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
 
   } catch (error) {
     console.error('An unexpected error occurred in the serverless function:', error);
-    return new Response('An internal server error occurred.', { status: 500 });
+    return new Response('An internal server error occurred.', { 
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
   }
 }
