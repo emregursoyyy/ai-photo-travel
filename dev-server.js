@@ -48,18 +48,32 @@ const server = http.createServer((req, res) => {
   if (pathname === '/functions/remove-background' && req.method === 'POST') {
     console.log('Mock API: Background removal request received');
     
-    // Simulate processing delay
-    setTimeout(() => {
-      const mockImage = mockRemoveBackground();
-      res.writeHead(200, {
-        'Content-Type': 'image/png',
-        'Content-Length': mockImage.length,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
-      res.end(mockImage);
-    }, 1000); // 1 second delay to simulate processing
+    // Parse form data
+    const form = new formidable.IncomingForm();
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        console.error('Form parsing error:', err);
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.end('Bad Request');
+        return;
+      }
+      
+      console.log('Form fields:', fields);
+      console.log('Files received:', Object.keys(files));
+      
+      // Simulate processing delay
+      setTimeout(() => {
+        const mockImage = mockRemoveBackground();
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Content-Length': mockImage.length,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        });
+        res.end(mockImage);
+      }, 1000); // 1 second delay to simulate processing
+    });
     return;
   }
 
