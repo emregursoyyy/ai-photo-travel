@@ -1443,27 +1443,19 @@
         // Modern 2025 Background Removal Functions
         async function removeBackgroundRMBG2(imageFile) {
             try {
-                // RMBG 2.0 with BiRefNet - Replicate API
-                const response = await fetch('https://api.replicate.com/v1/predictions', {
+                // Use backend proxy to avoid CORS issues
+                const formData = new FormData();
+                formData.append('image_file', imageFile);
+                formData.append('provider', 'replicate-rmbg2');
+                
+                const response = await fetch('/functions/remove-background', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Token ' + (API_CONFIG.providers.replicate?.token || ''),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        version: 'fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
-                        input: {
-                            image: await convertToBase64(imageFile),
-                            model: 'rmbg-2.0',
-                            return_mask: false
-                        }
-                    })
+                    body: formData
                 });
                 
                 if (!response.ok) throw new Error('RMBG 2.0 API error');
                 
-                const prediction = await response.json();
-                return await pollForResult(prediction.urls.get);
+                return await response.blob();
             } catch (error) {
                 console.warn('RMBG 2.0 failed:', error);
                 throw error;
@@ -1472,29 +1464,19 @@
 
         async function removeBackgroundSAM2(imageFile) {
             try {
-                // Meta's SAM2 for segmentation
-                const response = await fetch('https://api.replicate.com/v1/predictions', {
+                // Use backend proxy to avoid CORS issues
+                const formData = new FormData();
+                formData.append('image_file', imageFile);
+                formData.append('provider', 'replicate-sam2');
+                
+                const response = await fetch('/functions/remove-background', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Token ' + (API_CONFIG.providers.replicate?.token || ''),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        version: 'sam2-hiera-large',
-                        input: {
-                            image: await convertToBase64(imageFile),
-                            point_coords: null,
-                            point_labels: null,
-                            box: null,
-                            multimask_output: true
-                        }
-                    })
+                    body: formData
                 });
                 
                 if (!response.ok) throw new Error('SAM2 API error');
                 
-                const prediction = await response.json();
-                return await pollForResult(prediction.urls.get);
+                return await response.blob();
             } catch (error) {
                 console.warn('SAM2 failed:', error);
                 throw error;
@@ -1503,27 +1485,19 @@
 
         async function removeBackgroundBiRefNet(imageFile) {
             try {
-                // BiRefNet-HR for high resolution background removal
-                const response = await fetch('https://api.replicate.com/v1/predictions', {
+                // Use backend proxy to avoid CORS issues
+                const formData = new FormData();
+                formData.append('image_file', imageFile);
+                formData.append('provider', 'replicate-birefnet');
+                
+                const response = await fetch('/functions/remove-background', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Token ' + (API_CONFIG.providers.replicate?.token || ''),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        version: 'birefnet-hr-v1',
-                        input: {
-                            image: await convertToBase64(imageFile),
-                            high_resolution: true,
-                            refine_edges: true
-                        }
-                    })
+                    body: formData
                 });
                 
                 if (!response.ok) throw new Error('BiRefNet API error');
                 
-                const prediction = await response.json();
-                return await pollForResult(prediction.urls.get);
+                return await response.blob();
             } catch (error) {
                 console.warn('BiRefNet failed:', error);
                 throw error;
