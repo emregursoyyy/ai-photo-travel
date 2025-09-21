@@ -2,73 +2,191 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="AI ile fotoğraflarınızı dünyanın her yerinde çekilmiş gibi düzenleyin. Ücretsiz AI fotoğraf editörü ile hayalinizdeki seyahat fotoğraflarını oluşturun.">
-    <meta name="keywords" content="AI fotoğraf editörü, seyahat fotoğrafları, ücretsiz fotoğraf düzenleme, yapay zeka, background değiştirme">
-    <meta name="author" content="AI Photo Travel">
-    <meta name="robots" content="index, follow">
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="AI Photo Travel - Dünyanın Her Yerinde Ol">
-    <meta property="og:description" content="AI ile fotoğraflarınızı dünyanın her yerinde çekilmiş gibi düzenleyin. Ücretsiz AI fotoğraf editörü.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="./icon-512.png">
-    <meta property="og:site_name" content="AI Photo Travel">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="AI Photo Travel - Dünyanın Her Yerinde Ol">
-    <meta name="twitter:description" content="AI ile fotoğraflarınızı dünyanın her yerinde çekilmiş gibi düzenleyin.">
-    <meta name="twitter:image" content="./icon-512.png">
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#667eea">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AI Photo Travel">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-orientations" content="portrait">
+    <meta name="description" content="AI ile fotoğraflarınızı dünyanın her yerinde çekilmiş gibi düzenleyin">
     
-    <title>AI Photo Travel - Dünyanın Her Yerinde Ol | Ücretsiz AI Fotoğraf Editörü</title>
-    <meta http-equiv="refresh" content="0; url=ai-photo-editor.html">
-    <link rel="canonical" href="./ai-photo-editor.html">
+    <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxwYXRoIGQ9Ik05MCA0NEM2OS4zNCA0NCA1MiA2MS4zNCA1MiA4MlMxMDUgMTM2IDkwIDEzNlM1MiAxMDIuNjYgNTIgODJTNjkuMzQgNDQgOTAgNDRaIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjkiLz4KPHA+dGggZD0iTTkwIDYwQzc3Ljc0IDYwIDY4IDY5Ljc0IDY4IDgyUzc3Ljc0IDEwNCA5MCAxMDRTMTEyIDk0LjI2IDExMiA4MlMxMDIuMjYgNjAgOTAgNjBaIiBmaWxsPSIjNjY3ZWVhIi8+CjxwYXRoIGQ9Ik0xMjYgMTIwSDEzOFYxMzJIMTI2VjEyMFoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOCIvPgo8cGF0aCBkPSJNNDIgMTIwSDU0VjEzMkg0MlYxMjBaIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjgiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQwX2xpbmVhcl8xXzEiIHgxPSIwIiB5MT0iMCIgeDI9IjE4MCIgeTI9IjE4MCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzc2NGJhMiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=">
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzY2N2VlYSIvPgo8cGF0aCBkPSJNMTYgOEMxMi42OSA4IDEwIDEwLjY5IDEwIDE0UzE4IDI0IDE2IDI0UzEwIDE3LjMxIDEwIDE0UzEyLjY5IDggMTYgOFoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOSIvPgo8L3N2Zz4K">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            color: white;
-            text-align: center;
-        }
-        .loading {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-    </style>
+    
+    <title>AI Photo Travel - Dünyanın Her Yerinde Ol</title>
+    
+    <!-- Resource Hints for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://api.remove.bg">
+    <link rel="dns-prefetch" href="https://replicate.com">
+    <link rel="dns-prefetch" href="https://huggingface.co">
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
 </head>
 <body>
-    <div class="loading">
-        <h1>✈️ AI Photo Travel</h1>
-        <p>Uygulama yükleniyor...</p>
-        <p><a href="ai-photo-editor.html" style="color: white;">Buraya tıklayın</a></p>
+    <div class="app-container">
+        <div class="header">
+            <h1>✈️ AI Photo Travel</h1>
+            <p>Dünyanın her yerinde ol, hayallerini gerçekleştir</p>
+            <div class="free-app-badge">
+                <span class="badge">🆓 Tamamen Ücretsiz</span>
+                <small>Yerel işleme + Ücretsiz AI API'leri</small>
+            </div>
+        </div>
+
+        <div class="photo-upload" id="uploadSection">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">Selfie Yükle</div>
+                <div class="upload-subtext">Harika bir fotoğraf çek veya galerinden seç</div>
+                <button class="btn">Fotoğraf Seç</button>
+                <button class="btn btn-secondary" onclick="openCamera()">Kamera Aç</button>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" capture="user">
+        </div>
+
+        <div class="loading" id="loadingSection">
+            <div class="loading-spinner"></div>
+            <h3 id="loadingTitle">Fotoğrafın AI ile işleniyor...</h3>
+            <p id="loadingMessage">Bu birkaç saniye sürebilir</p>
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="error-container" id="errorContainer">
+            <div class="error-icon">⚠️</div>
+            <div class="error-title" id="errorTitle">Bir Hata Oluştu</div>
+            <div class="error-message" id="errorMessage">Lütfen tekrar deneyin</div>
+            <button class="retry-btn" onclick="retryLastOperation()">🔄 Tekrar Dene</button>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <div class="preview-container">
+                <img id="previewImage" class="preview-image" alt="Düzenlenmiş Fotoğraf">
+            </div>
+            <button class="btn" onclick="downloadImage()">📥 İndir</button>
+            <button class="btn" onclick="shareImage()" id="shareBtn" style="display: none;">📤 Paylaş</button>
+            <button class="btn btn-secondary" onclick="resetApp()">🔄 Yeni Fotoğraf</button>
+        </div>
     </div>
-    
-    <script>
-        // Server-side redirect kullanılıyor (_redirects dosyası)
-        // Fallback sadece client-side routing için
-        if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
-            window.location.replace('ai-photo-editor.html');
-        }
-    </script>
+
+    <!-- Kategori Seçim Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('categoryModal')">×</button>
+            <div class="modal-header">
+                <div class="modal-title">🌍 Nereye Gitmek İstiyorsun?</div>
+                <div class="modal-subtitle">En popüler destinasyonları keşfet</div>
+            </div>
+            <div class="category-grid">
+                <div class="category-card" onclick="selectCategory('cities')">
+                    <div class="category-icon">🏙️</div>
+                    <div class="category-name">Şehirler</div>
+                </div>
+                <div class="category-card" onclick="selectCategory('hotels')">
+                    <div class="category-icon">🏨</div>
+                    <div class="category-name">Oteller</div>
+                </div>
+                <div class="category-card" onclick="selectCategory('nature')">
+                    <div class="category-icon">🌿</div>
+                    <div class="category-name">Doğa</div>
+                </div>
+                <div class="category-card" onclick="selectCategory('landmarks')">
+                    <div class="category-icon">🗿</div>
+                    <div class="category-name">Simgeler</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lokasyon Seçim Modal -->
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('locationModal')">×</button>
+            <div class="modal-header">
+                <div class="modal-title" id="locationModalTitle">📍 Lokasyon Seç</div>
+                <div class="modal-subtitle">En popüler mekanları keşfet</div>
+            </div>
+            <div class="location-grid" id="locationGrid">
+                <!-- Dinamik olarak doldurulacak -->
+            </div>
+            <button class="btn" onclick="showParametersModal()" style="width: 100%; margin-top: 20px;">
+                Devam Et ➡️
+            </button>
+        </div>
+    </div>
+
+    <!-- Parametreler Modal -->
+    <div id="parametersModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('parametersModal')">×</button>
+            <div class="modal-header">
+                <div class="modal-title">⚡ Fotoğraf Ayarları</div>
+                <div class="modal-subtitle">Mükemmel sonuç için özelleştir</div>
+            </div>
+            
+            <div class="parameters-section">
+                <div class="parameter-group">
+                    <div class="parameter-label">🎨 Görsel Kalitesi</div>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="qualitySlider" min="1" max="10" value="7">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px;">
+                            <span>Hızlı</span>
+                            <span>Kaliteli</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="parameter-group">
+                    <div class="parameter-label">🌤️ Hava Durumu</div>
+                    <div class="time-options">
+                        <div class="time-option" onclick="selectWeather('sunny')">☀️ Güneşli</div>
+                        <div class="time-option" onclick="selectWeather('cloudy')">☁️ Bulutlu</div>
+                        <div class="time-option" onclick="selectWeather('rainy')">🌧️ Yağmurlu</div>
+                        <div class="time-option" onclick="selectWeather('sunset')">🌅 Gün Batımı</div>
+                    </div>
+                </div>
+
+                <div class="parameter-group">
+                    <div class="parameter-label">⏰ Zaman Dilimi</div>
+                    <div class="time-options">
+                        <div class="time-option" onclick="selectTime('morning')">🌅 Sabah</div>
+                        <div class="time-option" onclick="selectTime('afternoon')">☀️ Öğlen</div>
+                        <div class="time-option" onclick="selectTime('evening')">🌆 Akşam</div>
+                        <div class="time-option" onclick="selectTime('night')">🌙 Gece</div>
+                    </div>
+                </div>
+
+                <div class="parameter-group">
+                    <div class="parameter-label">👥 Kalabalık Seviyesi</div>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="crowdSlider" min="1" max="5" value="3">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px;">
+                            <span>Boş</span>
+                            <span>Kalabalık</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn generate-btn" onclick="generatePhoto()">
+                ✨ Fotoğrafı Oluştur
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

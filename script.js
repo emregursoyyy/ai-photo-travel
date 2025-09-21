@@ -1,724 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AI Photo Travel">
-    <meta name="apple-touch-fullscreen" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#667eea">
-    <meta name="msapplication-TileColor" content="#667eea">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="apple-mobile-web-app-orientations" content="portrait">
-    <meta name="description" content="AI ile fotoğraflarınızı dünyanın her yerinde çekilmiş gibi düzenleyin">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="./manifest.json">
-    
-    <!-- iOS Icons -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxwYXRoIGQ9Ik05MCA0NEM2OS4zNCA0NCA1MiA2MS4zNCA1MiA4MlMxMDUgMTM2IDkwIDEzNlM1MiAxMDIuNjYgNTIgODJTNjkuMzQgNDQgOTAgNDRaIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjkiLz4KPHA+dGggZD0iTTkwIDYwQzc3Ljc0IDYwIDY4IDY5Ljc0IDY4IDgyUzc3Ljc0IDEwNCA5MCAxMDRTMTEyIDk0LjI2IDExMiA4MlMxMDIuMjYgNjAgOTAgNjBaIiBmaWxsPSIjNjY3ZWVhIi8+CjxwYXRoIGQ9Ik0xMjYgMTIwSDEzOFYxMzJIMTI2VjEyMFoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOCIvPgo8cGF0aCBkPSJNNDIgMTIwSDU0VjEzMkg0MlYxMjBaIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjgiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQwX2xpbmVhcl8xXzEiIHgxPSIwIiB5MT0iMCIgeDI9IjE4MCIgeTI9IjE4MCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzc2NGJhMiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzY2N2VlYSIvPgo8cGF0aCBkPSJNMTYgOEMxMi42OSA4IDEwIDEwLjY5IDEwIDE0UzE4IDI0IDE2IDI0UzEwIDE3LjMxIDEwIDE0UzEyLjY5IDggMTYgOFoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOSIvPgo8L3N2Zz4K">
-    
-    <title>AI Photo Travel - Dünyanın Her Yerinde Ol</title>
-    
-    <!-- Resource Hints for Performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://api.remove.bg">
-    <link rel="dns-prefetch" href="https://replicate.com">
-    <link rel="dns-prefetch" href="https://huggingface.co">
-    
-    <!-- Critical CSS - Inline for faster rendering -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            color: #ffffff;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
-
-        .app-container {
-            max-width: 414px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            overflow: hidden;
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            padding: 60px 20px 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
-        }
-
-        .header h1 {
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            position: relative;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .header p {
-            font-size: 17px;
-            opacity: 0.95;
-            position: relative;
-            color: #ffffff;
-            font-weight: 500;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-        
-        .free-app-badge {
-            margin-top: 15px;
-            position: relative;
-        }
-        
-        .badge {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(15px);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 22px;
-            padding: 10px 18px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
-            display: inline-block;
-            margin-bottom: 8px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .free-app-badge small {
-            display: block;
-            font-size: 13px;
-            opacity: 0.9;
-            color: #ffffff;
-            font-weight: 500;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .photo-upload {
-            padding: 30px 20px;
-            text-align: center;
-        }
-
-        .upload-area {
-            border: 3px dashed rgba(255, 255, 255, 0.4);
-            border-radius: 24px;
-            padding: 40px 20px;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.08);
-            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
-            touch-action: manipulation;
-            backdrop-filter: blur(10px);
-        }
-
-        .upload-area:hover,
-        .upload-area:active {
-            border-color: rgba(79, 172, 254, 0.8);
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 8px 24px rgba(79, 172, 254, 0.2);
-        }
-
-        .upload-icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-        }
-
-        .upload-text {
-            font-size: 19px;
-            margin-bottom: 12px;
-            font-weight: 600;
-            color: #ffffff;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-        }
-
-        .upload-subtext {
-            font-size: 15px;
-            opacity: 0.85;
-            margin-bottom: 20px;
-            color: #e2e8f0;
-            font-weight: 500;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 16px 32px;
-            border-radius: 28px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            min-height: 48px;
-            min-width: 48px;
-            -webkit-appearance: none;
-            appearance: none;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:hover,
-        .btn:focus {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-            transition: all 0.1s ease;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.6);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            margin-left: 10px;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover,
-        .btn-secondary:focus {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-        }
-
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            padding: 30px;
-            max-width: 380px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            color: #1a1a2e;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .modal-title {
-            font-size: 26px;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 8px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-subtitle {
-            font-size: 15px;
-            color: #4a5568;
-            font-weight: 500;
-        }
-
-        .category-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .category-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 18px;
-            padding: 24px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #ffffff;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 16px rgba(79, 172, 254, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .category-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(79, 172, 254, 0.4);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .category-card.selected {
-            border-color: #ffffff;
-            box-shadow: 0 8px 32px rgba(79, 172, 254, 0.6);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .category-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .category-name {
-            font-size: 15px;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .location-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .location-item {
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 12px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            display: flex;
-            align-items: center;
-        }
-
-        .location-item:hover {
-            background: rgba(102, 126, 234, 0.2);
-        }
-
-        .location-item.selected {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            color: white;
-            border-color: #fff;
-        }
-
-        .location-emoji {
-            font-size: 24px;
-            margin-right: 15px;
-        }
-
-        .location-details h4 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .location-details p {
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        .parameters-section {
-            margin-top: 25px;
-        }
-
-        .parameter-group {
-            margin-bottom: 20px;
-        }
-
-        .parameter-label {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .slider-container {
-            margin-bottom: 15px;
-        }
-
-        .slider {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #4facfe;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .time-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .time-option {
-            background: rgba(102, 126, 234, 0.1);
-            border: 2px solid transparent;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .time-option.selected {
-            background: linear-gradient(45deg, #4facfe, #00f2fe);
-            color: white;
-            border-color: #fff;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(0, 0, 0, 0.1);
-            border: none;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            font-size: 18px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .generate-btn {
-            width: 100%;
-            margin-top: 20px;
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            font-size: 18px;
-            padding: 18px;
-        }
-
-        .preview-section {
-            display: none;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .preview-container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .preview-image {
-            max-width: 100%;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-            position: relative;
-        }
-
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #4facfe;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        .loading-progress {
-            width: 100%;
-            height: 6px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 3px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .loading-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-            border-radius: 3px;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .error-container {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px;
-            text-align: center;
-            display: none;
-        }
-
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .error-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .error-message {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 20px;
-        }
-
-        .retry-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .retry-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        #fileInput {
-            display: none;
-        }
-    </style>
-    <script src="config.js"></script>
-</head>
-<body>
-    <div class="app-container">
-        <div class="header">
-            <h1>✈️ AI Photo Travel</h1>
-            <p>Dünyanın her yerinde ol, hayallerini gerçekleştir</p>
-            <div class="free-app-badge">
-                <span class="badge">🆓 Tamamen Ücretsiz</span>
-                <small>Yerel işleme + Ücretsiz AI API'leri</small>
-            </div>
-        </div>
-
-        <div class="photo-upload" id="uploadSection">
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <div class="upload-icon">📸</div>
-                <div class="upload-text">Selfie Yükle</div>
-                <div class="upload-subtext">Harika bir fotoğraf çek veya galerinden seç</div>
-                <button class="btn">Fotoğraf Seç</button>
-                <button class="btn btn-secondary" onclick="openCamera()">Kamera Aç</button>
-            </div>
-            <input type="file" id="fileInput" accept="image/*" capture="user">
-        </div>
-
-        <div class="loading" id="loadingSection">
-            <div class="loading-spinner"></div>
-            <h3 id="loadingTitle">Fotoğrafın AI ile işleniyor...</h3>
-            <p id="loadingMessage">Bu birkaç saniye sürebilir</p>
-            <div class="loading-progress">
-                <div class="loading-progress-bar" id="progressBar"></div>
-            </div>
-        </div>
-
-        <div class="error-container" id="errorContainer">
-            <div class="error-icon">⚠️</div>
-            <div class="error-title" id="errorTitle">Bir Hata Oluştu</div>
-            <div class="error-message" id="errorMessage">Lütfen tekrar deneyin</div>
-            <button class="retry-btn" onclick="retryLastOperation()">🔄 Tekrar Dene</button>
-        </div>
-
-        <div class="preview-section" id="previewSection">
-            <div class="preview-container">
-                <img id="previewImage" class="preview-image" alt="Düzenlenmiş Fotoğraf">
-            </div>
-            <button class="btn" onclick="downloadImage()">📥 İndir</button>
-            <button class="btn" onclick="shareImage()" id="shareBtn" style="display: none;">📤 Paylaş</button>
-            <button class="btn btn-secondary" onclick="resetApp()">🔄 Yeni Fotoğraf</button>
-        </div>
-    </div>
-
-    <!-- Kategori Seçim Modal -->
-    <div id="categoryModal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('categoryModal')">×</button>
-            <div class="modal-header">
-                <div class="modal-title">🌍 Nereye Gitmek İstiyorsun?</div>
-                <div class="modal-subtitle">En popüler destinasyonları keşfet</div>
-            </div>
-            <div class="category-grid">
-                <div class="category-card" onclick="selectCategory('cities')">
-                    <div class="category-icon">🏙️</div>
-                    <div class="category-name">Şehirler</div>
-                </div>
-                <div class="category-card" onclick="selectCategory('hotels')">
-                    <div class="category-icon">🏨</div>
-                    <div class="category-name">Oteller</div>
-                </div>
-                <div class="category-card" onclick="selectCategory('nature')">
-                    <div class="category-icon">🌿</div>
-                    <div class="category-name">Doğa</div>
-                </div>
-                <div class="category-card" onclick="selectCategory('landmarks')">
-                    <div class="category-icon">🗿</div>
-                    <div class="category-name">Simgeler</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Lokasyon Seçim Modal -->
-    <div id="locationModal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('locationModal')">×</button>
-            <div class="modal-header">
-                <div class="modal-title" id="locationModalTitle">📍 Lokasyon Seç</div>
-                <div class="modal-subtitle">En popüler mekanları keşfet</div>
-            </div>
-            <div class="location-grid" id="locationGrid">
-                <!-- Dinamik olarak doldurulacak -->
-            </div>
-            <button class="btn" onclick="showParametersModal()" style="width: 100%; margin-top: 20px;">
-                Devam Et ➡️
-            </button>
-        </div>
-    </div>
-
-    <!-- Parametreler Modal -->
-    <div id="parametersModal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('parametersModal')">×</button>
-            <div class="modal-header">
-                <div class="modal-title">⚡ Fotoğraf Ayarları</div>
-                <div class="modal-subtitle">Mükemmel sonuç için özelleştir</div>
-            </div>
-            
-            <div class="parameters-section">
-                <div class="parameter-group">
-                    <div class="parameter-label">🌅 Günün Saati</div>
-                    <div class="time-options">
-                        <div class="time-option selected" data-time="morning">Sabah</div>
-                        <div class="time-option" data-time="noon">Öğlen</div>
-                        <div class="time-option" data-time="sunset">Gün Batımı</div>
-                        <div class="time-option" data-time="night">Gece</div>
-                    </div>
-                </div>
-
-                <div class="parameter-group">
-                    <div class="parameter-label">☁️ Hava Durumu</div>
-                    <div class="time-options">
-                        <div class="time-option selected" data-weather="sunny">Güneşli</div>
-                        <div class="time-option" data-weather="cloudy">Bulutlu</div>
-                        <div class="time-option" data-weather="rainy">Yağmurlu</div>
-                        <div class="time-option" data-weather="snowy">Karlı</div>
-                    </div>
-                </div>
-
-                <div class="parameter-group">
-                    <div class="parameter-label">👥 Kalabalık Seviyesi</div>
-                    <div class="slider-container">
-                        <input type="range" min="0" max="100" value="30" class="slider" id="crowdSlider">
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
-                            <span>Tenha</span>
-                            <span>Kalabalık</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="parameter-group">
-                    <div class="parameter-label">📸 Fotoğraf Kalitesi</div>
-                    <div class="slider-container">
-                        <input type="range" min="1" max="10" value="8" class="slider" id="qualitySlider">
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
-                            <span>Hızlı</span>
-                            <span>Ultra HD</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn generate-btn" onclick="generatePhoto()">
-                ✨ Fotoğrafı Oluştur
-            </button>
-        </div>
-    </div>
-
-    <script>
-        // API Configuration
+// API Configuration
         const API_CONFIG = {
             // Hugging Face ücretsiz Inference API
             // Token config.js dosyasından alınır (deployment sırasında inject edilir)
@@ -1472,8 +752,8 @@
             return new Promise((resolve) => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                canvas.width = 768;
-                canvas.height = 768;
+                canvas.width = 1024;
+                canvas.height = 1024;
                 
                 const bgImg = new Image();
                 const fgImg = new Image();
@@ -1490,33 +770,50 @@
                         // Draw background image (fill entire canvas)
                         ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
                         
-                        // Calculate person positioning (center-bottom)
+                        // Calculate person positioning for realistic travel photo effect
                         const fgAspectRatio = fgImg.width / fgImg.height;
                         let personWidth, personHeight;
                         
-                        // Scale person to fit nicely in the scene
+                        // Scale person to fit naturally in the travel scene
                         if (fgAspectRatio > 1) {
                             // Landscape person image
-                            personWidth = canvas.width * 0.5;
+                            personWidth = canvas.width * 0.4; // Smaller for more realistic scale
                             personHeight = personWidth / fgAspectRatio;
                         } else {
-                            // Portrait person image
-                            personHeight = canvas.height * 0.7;
+                            // Portrait person image - typical selfie
+                            personHeight = canvas.height * 0.6; // More realistic travel photo scale
                             personWidth = personHeight * fgAspectRatio;
                         }
                         
-                        // Center horizontally, position at bottom
-                        const x = (canvas.width - personWidth) / 2;
-                        const y = canvas.height - personHeight - (canvas.height * 0.05);
+                        // Position person more naturally (slightly off-center, rule of thirds)
+                        const x = canvas.width * 0.3; // Off-center positioning
+                        const y = canvas.height - personHeight - (canvas.height * 0.1);
                         
-                        // Apply shadow effect
-                        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                        ctx.shadowBlur = 10;
-                        ctx.shadowOffsetX = 0;
-                        ctx.shadowOffsetY = 5;
+                        // Apply realistic shadow based on lighting conditions
+                        const shadowIntensity = parameters.time === 'noon' ? 0.4 : 
+                                              parameters.time === 'morning' ? 0.2 :
+                                              parameters.time === 'sunset' ? 0.3 : 0.1;
                         
-                        // Draw person
+                        ctx.shadowColor = `rgba(0, 0, 0, ${shadowIntensity})`;
+                        ctx.shadowBlur = 15;
+                        ctx.shadowOffsetX = parameters.time === 'sunset' ? -8 : 3;
+                        ctx.shadowOffsetY = 8;
+                        
+                        // Apply perspective correction for travel photo realism
+                        ctx.save();
+                        
+                        // Slight perspective transform for depth
+                        const perspectiveStrength = 0.02;
+                        ctx.transform(
+                            1, perspectiveStrength, // Slight skew for perspective
+                            0, 1,
+                            0, 0
+                        );
+                        
+                        // Draw person with enhanced realism
                         ctx.drawImage(fgImg, x, y, personWidth, personHeight);
+                        
+                        ctx.restore();
                         
                         // Reset shadow
                         ctx.shadowColor = 'transparent';
@@ -1524,18 +821,60 @@
                         ctx.shadowOffsetX = 0;
                         ctx.shadowOffsetY = 0;
                         
-                        // Add subtle vignette effect
-                        const gradient = ctx.createRadialGradient(
-                            canvas.width / 2, canvas.height / 2, 0,
-                            canvas.width / 2, canvas.height / 2, canvas.width / 2
-                        );
-                        gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+                        // Add atmospheric effects based on location and weather
+                        if (parameters.weather === 'sunset') {
+                            // Warm sunset glow
+                            const sunsetGradient = ctx.createRadialGradient(
+                                canvas.width * 0.8, canvas.height * 0.2, 0,
+                                canvas.width * 0.8, canvas.height * 0.2, canvas.width * 0.6
+                            );
+                            sunsetGradient.addColorStop(0, 'rgba(255, 165, 0, 0.15)');
+                            sunsetGradient.addColorStop(1, 'rgba(255, 69, 0, 0.05)');
+                            
+                            ctx.fillStyle = sunsetGradient;
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        }
                         
-                        ctx.fillStyle = gradient;
+                        if (parameters.weather === 'cloudy') {
+                            // Soft diffused lighting
+                            ctx.fillStyle = 'rgba(200, 200, 220, 0.1)';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        
+                        // Add subtle vignette for professional photo look
+                        const vignetteGradient = ctx.createRadialGradient(
+                            canvas.width / 2, canvas.height / 2, 0,
+                            canvas.width / 2, canvas.height / 2, canvas.width * 0.7
+                        );
+                        vignetteGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                        vignetteGradient.addColorStop(0.7, 'rgba(0, 0, 0, 0)');
+                        vignetteGradient.addColorStop(1, 'rgba(0, 0, 0, 0.15)');
+                        
+                        ctx.fillStyle = vignetteGradient;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         
-                        resolve(canvas.toDataURL('image/jpeg', 0.92));
+                        // Add color grading for travel photo aesthetic
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const data = imageData.data;
+                        
+                        // Apply subtle color grading based on time and weather
+                        for (let i = 0; i < data.length; i += 4) {
+                            if (parameters.time === 'sunset') {
+                                // Warm sunset tones
+                                data[i] = Math.min(255, data[i] * 1.1);     // Red boost
+                                data[i + 1] = Math.min(255, data[i + 1] * 1.05); // Green slight boost
+                                data[i + 2] = Math.min(255, data[i + 2] * 0.95);  // Blue reduction
+                            } else if (parameters.time === 'morning') {
+                                // Cool morning tones
+                                data[i] = Math.min(255, data[i] * 1.02);     // Red slight boost
+                                data[i + 1] = Math.min(255, data[i + 1] * 1.05); // Green boost
+                                data[i + 2] = Math.min(255, data[i + 2] * 1.08);  // Blue boost
+                            }
+                        }
+                        
+                        ctx.putImageData(imageData, 0, 0);
+                        
+                        resolve(canvas.toDataURL('image/jpeg', 0.95));
                     }
                 };
                 
@@ -1917,180 +1256,3 @@
                 indicator.style.opacity = '1';
             }
         }
-
-        // Listen for network changes
-        window.addEventListener('online', updateNetworkStatus);
-        window.addEventListener('offline', updateNetworkStatus);
-        
-        // Initial network status check
-        updateNetworkStatus();
-
-        // Performance Optimizations
-        // Lazy loading for images
-        function lazyLoadImages() {
-            const images = document.querySelectorAll('img[data-src]');
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                        imageObserver.unobserve(img);
-                    }
-                });
-            });
-            images.forEach(img => imageObserver.observe(img));
-        }
-
-        // Image compression before upload
-        function compressImage(file, maxWidth = 1024, quality = 0.8) {
-            return new Promise((resolve) => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                
-                img.onload = () => {
-                    const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-                    canvas.width = img.width * ratio;
-                    canvas.height = img.height * ratio;
-                    
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    canvas.toBlob(resolve, 'image/jpeg', quality);
-                };
-                
-                img.src = URL.createObjectURL(file);
-            });
-        }
-
-        // Preload critical resources
-        function preloadCriticalResources() {
-            const criticalImages = [
-                'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzY2N2VlYSIvPgo8cGF0aCBkPSJNMTYgOEMxMi42OSA4IDEwIDEwLjY5IDEwIDE0UzE4IDI0IDE2IDI0UzEwIDE3LjMxIDEwIDE0UzEyLjY5IDggMTYgOFoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOSIvPgo8L3N2Zz4K'
-            ];
-            
-            criticalImages.forEach(src => {
-                const link = document.createElement('link');
-                link.rel = 'preload';
-                link.as = 'image';
-                link.href = src;
-                document.head.appendChild(link);
-            });
-        }
-
-        // Initialize performance optimizations
-        document.addEventListener('DOMContentLoaded', () => {
-            lazyLoadImages();
-            preloadCriticalResources();
-        });
-
-        // Memory cleanup
-        window.addEventListener('beforeunload', () => {
-            // Clean up any remaining object URLs
-            if (window.currentImageURL) {
-                URL.revokeObjectURL(window.currentImageURL);
-            }
-        });
-    </script>
-    
-    <!-- iPhone Specific Optimizations -->
-    <style>
-        /* iPhone specific improvements */
-        @media screen and (max-width: 414px) {
-            .app-container {
-                border-radius: 0;
-                max-width: 100%;
-                min-height: 100vh;
-                min-height: -webkit-fill-available;
-            }
-            
-            .header {
-                padding: 70px 24px 40px;
-                border-radius: 0;
-            }
-            
-            .btn {
-                min-height: 50px;
-                font-size: 18px;
-                padding: 18px 36px;
-                border-radius: 30px;
-            }
-            
-            .upload-area {
-                padding: 50px 24px;
-                margin: 20px;
-                border-width: 4px;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 20px;
-                border-radius: 30px;
-                padding: 40px 24px;
-            }
-            
-            .category-card {
-                padding: 28px 20px;
-                border-radius: 20px;
-                min-height: 120px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-        }
-        
-        /* iPhone X and newer with notch */
-        @media screen and (max-width: 414px) and (min-height: 812px) {
-            .header {
-                padding-top: calc(70px + env(safe-area-inset-top));
-            }
-            
-            .app-container {
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            }
-        }
-        
-        /* Dark mode support for better readability */
-        @media (prefers-color-scheme: dark) {
-            .modal-content {
-                background: rgba(26, 26, 46, 0.95);
-                color: #ffffff;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-            
-            .modal-title {
-                color: #ffffff;
-            }
-            
-            .modal-subtitle {
-                color: #cbd5e0;
-            }
-        }
-        
-        /* High contrast mode for accessibility */
-        @media (prefers-contrast: high) {
-            .btn {
-                border-width: 3px;
-                border-color: #ffffff;
-            }
-            
-            .upload-area {
-                border-width: 4px;
-                border-color: rgba(255, 255, 255, 0.8);
-            }
-            
-            .category-card {
-                border-width: 3px;
-            }
-        }
-        
-        /* Reduced motion for accessibility */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
-</body>
-</html>
