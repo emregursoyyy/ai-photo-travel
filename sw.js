@@ -49,7 +49,8 @@ self.addEventListener('fetch', event => {
     else if (url.origin !== location.origin || 
              request.url.includes('api-inference.huggingface.co') ||
              request.url.includes('replicate.com') ||
-             request.url.includes('remove.bg')) {
+             request.url.includes('remove.bg') ||
+             request.url.includes('/functions/remove-background')) {
       event.respondWith(handleApiRequest(request));
     }
     // Handle static files with cache-first strategy
