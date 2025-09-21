@@ -1,0 +1,15 @@
+# Netlify redirects file
+# Redirect all routes to index page for SPA behavior
+/*    /ai-photo-editor.html   200
+
+# API proxy to avoid CORS issues (if needed)
+/api/*  https://image.pollinations.ai/:splat  200
+
+# Security headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://image.pollinations.ai https://api-inference.huggingface.co;
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
