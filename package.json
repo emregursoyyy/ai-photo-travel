@@ -1,0 +1,46 @@
+{
+  "name": "ai-photo-travel",
+  "version": "1.0.0",
+  "description": "Tamamen ücretsiz AI destekli fotoğraf düzenleme web uygulaması",
+  "main": "ai-photo-editor.html",
+  "scripts": {
+    "start": "python -m http.server 3000",
+    "dev": "node dev-server.js",
+    "dev-simple": "python -m http.server 8080",
+    "build": "node build.js",
+    "deploy": "npm run build && echo 'Ready for deployment to Cloudflare Pages'"
+  },
+  "keywords": [
+    "ai",
+    "photo-editing",
+    "travel",
+    "free",
+    "web-app",
+    "pwa",
+    "javascript",
+    "canvas",
+    "pollinations"
+  ],
+  "author": "AI Photo Travel Team",
+  "license": "MIT",
+  "devDependencies": {
+    "formidable": "^3.5.1"
+  },
+  "homepage": "https://github.com/username/ai-photo-travel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/ai-photo-travel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/username/ai-photo-travel/issues"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie <= 11"
+  ]
+}
