@@ -178,8 +178,30 @@ export async function onRequestOptions(context) {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400'
+    }
+  });
+}
+
+// Handle all HTTP methods to support CORS
+export async function onRequest(context) {
+  // Handle OPTIONS request
+  if (context.request.method === "OPTIONS") {
+    return onRequestOptions(context);
+  }
+  
+  // Handle POST request
+  if (context.request.method === "POST") {
+    return onRequestPost(context);
+  }
+  
+  // Method not allowed
+  return new Response("Method not allowed", {
+    status: 405,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'text/plain'
     }
   });
 }

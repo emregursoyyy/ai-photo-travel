@@ -6,6 +6,14 @@ compatibility_date = "2024-01-01"
 command = "npm run build"
 destination = "./"
 
+# Functions configuration
+[functions]
+directory = "functions"
+
+[[routes]]
+pattern = "/functions/remove-background"
+function = "remove-background"
+
 [env.production.vars]
 # Environment variables will be set in Cloudflare Pages dashboard
 # HUGGING_FACE_TOKEN = "your_token_here"

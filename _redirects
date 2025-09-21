@@ -5,6 +5,10 @@
 # API proxy to avoid CORS issues (if needed)
 /api/*  https://image.pollinations.ai/:splat  200
 
+# Allow OPTIONS requests for CORS preflight
+/functions/remove-background  /.netlify/functions/remove-background  200
+/functions/*  /.netlify/functions/:splat  200
+
 # Security headers
 /*
   X-Frame-Options: DENY
