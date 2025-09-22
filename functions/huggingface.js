@@ -31,7 +31,7 @@ export async function onRequest(context) {
         
         // Request body'den model adını ve image data'sını al
         const formData = await request.formData();
-        const modelName = formData.get('model') || 'briaai/RMBG-2.0';
+        const modelName = formData.get('model') || 'briaai/RMBG-1.4';
         const imageFile = formData.get('image');
         
         if (!imageFile) {
