@@ -1,9 +1,10 @@
 {
   "version": 1,
   "include": [
-    "/api/*"
+    "/huggingface"
   ],
   "exclude": [
+    "/api/*",
     "/assets/*",
     "/images/*",
     "/*.html",
