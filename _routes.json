@@ -3,23 +3,5 @@
   "include": [
     "/huggingface"
   ],
-  "exclude": [
-    "/api/*",
-    "/assets/*",
-    "/images/*",
-    "/*.html",
-    "/*.css",
-    "/*.json",
-    "/*.ico",
-    "/*.png",
-    "/*.jpg",
-    "/*.jpeg",
-    "/*.gif",
-    "/*.svg",
-    "/*.webp",
-    "/*.woff",
-    "/*.woff2",
-    "/*.ttf",
-    "/*.eot"
-  ]
+  "exclude": []
 }

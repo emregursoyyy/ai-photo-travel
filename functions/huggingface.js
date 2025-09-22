@@ -1,7 +1,7 @@
 // Cloudflare Pages Function - Hugging Face API Proxy
 // Bu fonksiyon environment değişkenlerini güvenli şekilde kullanır
 
-export async function onRequestPost(context) {
+export async function onRequest(context) {
     const { request, env } = context;
     
     try {
