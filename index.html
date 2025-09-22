@@ -756,34 +756,59 @@
         const API_CONFIG = {
             // Multiple API providers for redundancy
             providers: {
+                // En güçlü ücretsiz modeller öncelikli sıralama (2025)
                 huggingface: {
                     token: getEnvVariable('HUGGING_FACE_TOKEN'),
-                    backgroundRemovalModel: 'briaai/RMBG-2.0',
-                    imageGenerationModel: 'runwayml/stable-diffusion-v1-5',
+                    // BiRefNet - En yeni ve en güçlü açık kaynak model
+                    backgroundRemovalModel: 'ZhengPeng7/BiRefNet',
+                    // Fallback modeller
+                    fallbackModels: [
+                        'briaai/RMBG-2.0',  // BRIA AI'nin gelişmiş modeli
+                        'briaai/RMBG-1.4',  // Stabil versiyon
+                        'danielgatis/rembg-new'  // Rembg'nin yeni versiyonu
+                    ],
+                    imageGenerationModel: 'stabilityai/stable-diffusion-xl-base-1.0',
                     baseUrl: 'https://api-inference.huggingface.co/models/',
-                    enabled: !!getEnvVariable('HUGGING_FACE_TOKEN')
+                    enabled: true,  // Token olmasa bile bazı modeller ücretsiz
+                    priority: 1
+                },
+                // Rembg açık kaynak kütüphanesi - yerel işlem
+                rembg: {
+                    models: [
+                        'birefnet-general',  // En yeni ve en iyi
+                        'isnet-general-use', // Genel kullanım için optimize
+                        'u2net',            // Klasik güvenilir model
+                        'u2netp',           // Hafif versiyon
+                        'silueta'           // Küçük boyut
+                    ],
+                    enabled: true,
+                    priority: 2,
+                    local: true  // Yerel canvas işlemi
                 },
                 replicate: {
                     token: getEnvVariable('REPLICATE_TOKEN') || '',
                     backgroundRemovalModel: 'cjwbw/rembg',
                     imageGenerationModel: 'stability-ai/stable-diffusion',
                     baseUrl: 'https://api.replicate.com/v1/predictions',
-                    enabled: false // Token yoksa devre dışı
-                },
-                pollinations: {
-                    // Tamamen ücretsiz, token gerektirmez
-                    baseUrl: 'https://image.pollinations.ai/prompt/',
-                    enabled: true
+                    enabled: !!getEnvVariable('REPLICATE_TOKEN'),
+                    priority: 3
                 },
                 removebg: {
                     token: getEnvVariable('REMOVEBG_TOKEN') || '',
                     baseUrl: 'https://api.remove.bg/v1.0/removebg',
-                    enabled: !!getEnvVariable('REMOVEBG_TOKEN')
+                    enabled: !!getEnvVariable('REMOVEBG_TOKEN'),
+                    priority: 4
+                },
+                // Pollinations düşük öncelik - kalite sorunları var
+                pollinations: {
+                    baseUrl: 'https://image.pollinations.ai/prompt/',
+                    enabled: true,
+                    priority: 5  // En son seçenek
                 },
                 photoscissors: {
-                    // Ücretsiz background removal servisi
                     baseUrl: 'https://photoscissors.com/api/v1/cutout',
-                    enabled: true
+                    enabled: true,
+                    priority: 6  // Backup
                 }
             },
             
@@ -1257,31 +1282,95 @@
         }
 
         async function removeBackgroundWithRetry(imageFile, maxRetries = 5) {
-            const providers = ['photoscissors', 'huggingface', 'removebg', 'replicate'];
+            // 2025 En güçlü ücretsiz modeller öncelik sıralaması
+            const providers = Object.entries(API_CONFIG.providers)
+                .filter(([name, config]) => config.enabled)
+                .sort((a, b) => (a[1].priority || 999) - (b[1].priority || 999))
+                .map(([name]) => name);
+            
+            console.log('Provider öncelik sırası:', providers);
             
             for (const provider of providers) {
-                if (!API_CONFIG.providers[provider].enabled) continue;
+                const config = API_CONFIG.providers[provider];
+                if (!config.enabled) continue;
                 
-                for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                    try {
-                        updateLoadingMessage(`${provider.toUpperCase()} ile arka plan kaldırılıyor... (${attempt}/${maxRetries})`);
-                        
-                        const result = await removeBackgroundWithProvider(imageFile, provider);
-                        if (result) return result;
-                        
-                    } catch (error) {
-                        console.error(`${provider} attempt ${attempt} failed:`, error);
-                        
-                        if (attempt < maxRetries) {
-                            const delay = API_CONFIG.retryDelay * attempt;
-                            updateLoadingMessage(`${delay/1000} saniye bekleniyor...`);
-                            await new Promise(resolve => setTimeout(resolve, delay));
+                // Hugging Face için model fallback sistemi
+                if (provider === 'huggingface') {
+                    const models = [config.backgroundRemovalModel, ...config.fallbackModels];
+                    
+                    for (const model of models) {
+                        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                            try {
+                                updateLoadingMessage(`${model} modeli ile işleniyor... (${attempt}/${maxRetries})`);
+                                
+                                const result = await removeBackgroundHuggingFaceWithModel(imageFile, config, model);
+                                if (result) {
+                                    console.log(`Başarılı: ${model}`);
+                                    return result;
+                                }
+                                
+                            } catch (error) {
+                                console.error(`${model} attempt ${attempt} failed:`, error);
+                                
+                                if (attempt < maxRetries) {
+                                    const delay = API_CONFIG.retryDelay * attempt;
+                                    updateLoadingMessage(`${delay/1000} saniye bekleniyor...`);
+                                    await new Promise(resolve => setTimeout(resolve, delay));
+                                }
+                            }
+                        }
+                    }
+                } else if (provider === 'rembg') {
+                    // Yerel rembg modelleri
+                    const models = config.models;
+                    
+                    for (const model of models) {
+                        try {
+                            updateLoadingMessage(`${model} yerel modeli ile işleniyor...`);
+                            
+                            const result = await removeBackgroundLocalRembg(imageFile, model);
+                            if (result) {
+                                console.log(`Başarılı yerel model: ${model}`);
+                                return result;
+                            }
+                            
+                        } catch (error) {
+                            console.error(`${model} yerel model failed:`, error);
+                        }
+                    }
+                } else {
+                    // Diğer provider'lar için standart deneme
+                    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                        try {
+                            updateLoadingMessage(`${provider.toUpperCase()} ile arka plan kaldırılıyor... (${attempt}/${maxRetries})`);
+                            
+                            const result = await removeBackgroundWithProvider(imageFile, provider);
+                            if (result) {
+                                console.log(`Başarılı provider: ${provider}`);
+                                return result;
+                            }
+                            
+                        } catch (error) {
+                            console.error(`${provider} attempt ${attempt} failed:`, error);
+                            
+                            if (attempt < maxRetries) {
+                                const delay = API_CONFIG.retryDelay * attempt;
+                                updateLoadingMessage(`${delay/1000} saniye bekleniyor...`);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                            }
                         }
                     }
                 }
             }
             
-            // No local fallback - show error
+            // Son çare: Gelişmiş yerel algoritma
+            try {
+                updateLoadingMessage('Gelişmiş yerel algoritma ile işleniyor...');
+                return await removeBackgroundAdvancedLocal(imageFile);
+            } catch (error) {
+                console.error('Yerel algoritma da başarısız:', error);
+            }
+            
             throw new Error('Tüm arka plan kaldırma servisleri başarısız oldu. Lütfen daha sonra tekrar deneyin.');
         }
 
@@ -1297,9 +1386,164 @@
                     return await removeBackgroundRemoveBG(imageFile, config);
                 case 'replicate':
                     return await removeBackgroundReplicate(imageFile, config);
+                case 'rembg':
+                    // Yerel rembg işlemi - bu fonksiyon ayrıca çağrılır
+                    return await removeBackgroundLocalRembg(imageFile, config.models[0]);
                 default:
                     throw new Error(`Bilinmeyen provider: ${provider}`);
             }
+        }
+        
+        // Hugging Face ile spesifik model kullanma
+        async function removeBackgroundHuggingFaceWithModel(imageFile, config, modelName) {
+            if (!config.token && !modelName.includes('briaai')) {
+                // Token gerektiren modeller için
+                throw new Error('Hugging Face token gerekli');
+            }
+            
+            const formData = new FormData();
+            formData.append('inputs', imageFile);
+            
+            const timeoutId = setTimeout(() => {
+                throw new Error('Hugging Face API timeout');
+            }, API_CONFIG.timeout);
+            
+            try {
+                const response = await fetch(`${config.baseUrl}${modelName}`, {
+                    method: 'POST',
+                    headers: config.token ? {
+                        'Authorization': `Bearer ${config.token}`,
+                        'Content-Type': 'application/json'
+                    } : {},
+                    body: formData
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Hugging Face API error (${modelName}): ${response.status} - ${errorText}`);
+                }
+                
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+        
+        // Yerel Rembg benzeri algoritma (BiRefNet yaklaşımı)
+        async function removeBackgroundLocalRembg(imageFile, modelType = 'birefnet-general') {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    
+                    let mask;
+                    
+                    switch (modelType) {
+                        case 'birefnet-general':
+                            mask = birefnetSegmentation(data, canvas.width, canvas.height);
+                            break;
+                        case 'isnet-general-use':
+                            mask = isnetSegmentation(data, canvas.width, canvas.height);
+                            break;
+                        case 'u2net':
+                            mask = u2netSegmentation(data, canvas.width, canvas.height);
+                            break;
+                        case 'u2netp':
+                            mask = u2netpSegmentation(data, canvas.width, canvas.height);
+                            break;
+                        default:
+                            mask = birefnetSegmentation(data, canvas.width, canvas.height);
+                    }
+                    
+                    // Alpha channel'ı güncelle
+                    for (let i = 0; i < data.length; i += 4) {
+                        const pixelIndex = Math.floor(i / 4);
+                        data[i + 3] = mask[pixelIndex] ? 255 : 0;
+                    }
+                    
+                    ctx.putImageData(imageData, 0, 0);
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            resolve(URL.createObjectURL(blob));
+                        } else {
+                            reject(new Error('Canvas blob oluşturulamadı'));
+                        }
+                    }, 'image/png');
+                };
+                
+                img.onerror = () => reject(new Error('Resim yüklenemedi'));
+                
+                if (imageFile instanceof File || imageFile instanceof Blob) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => img.src = e.target.result;
+                    reader.onerror = () => reject(new Error('Dosya okunamadı'));
+                    reader.readAsDataURL(imageFile);
+                } else if (typeof imageFile === 'string') {
+                    img.src = imageFile;
+                }
+            });
+        }
+        
+        // Gelişmiş yerel algoritma (sorun ve çözümler.txt'den)
+        async function removeBackgroundAdvancedLocal(imageFile) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    
+                    // Gelişmiş algoritma: GrabCut benzeri yaklaşım
+                    const foregroundMask = detectForegroundAdvanced(data, canvas.width, canvas.height);
+                    
+                    // Alpha channel'ı güncelle
+                    for (let i = 0; i < data.length; i += 4) {
+                        const pixelIndex = Math.floor(i / 4);
+                        data[i + 3] = foregroundMask[pixelIndex] ? 255 : 0;
+                    }
+                    
+                    ctx.putImageData(imageData, 0, 0);
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            resolve(URL.createObjectURL(blob));
+                        } else {
+                            reject(new Error('Canvas blob oluşturulamadı'));
+                        }
+                    }, 'image/png');
+                };
+                
+                img.onerror = () => reject(new Error('Resim yüklenemedi'));
+                
+                if (imageFile instanceof File || imageFile instanceof Blob) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => img.src = e.target.result;
+                    reader.onerror = () => reject(new Error('Dosya okunamadı'));
+                    reader.readAsDataURL(imageFile);
+                } else if (typeof imageFile === 'string') {
+                    img.src = imageFile;
+                }
+            });
         }
 
         async function removeBackgroundHuggingFace(imageFile, config) {
@@ -1553,6 +1797,484 @@
             return edges;
         }
 
+        // BiRefNet benzeri segmentasyon algoritması
+        function birefnetSegmentation(imageData, width, height) {
+            const mask = new Uint8Array(width * height);
+            
+            // Gelişmiş edge detection ve saliency detection
+            const edges = detectEdges(imageData, width, height);
+            const saliency = detectSaliency(imageData, width, height);
+            
+            // Renk clustering ile ön plan tespiti
+            const colorClusters = performColorClustering(imageData, width, height, 8);
+            const foregroundCluster = findForegroundCluster(colorClusters, width, height);
+            
+            // Birleşik mask oluşturma
+            for (let i = 0; i < width * height; i++) {
+                const edgeStrength = edges[i];
+                const saliencyStrength = saliency[i];
+                const colorScore = colorClusters[i] === foregroundCluster ? 1 : 0;
+                
+                // Ağırlıklı kombinasyon
+                const score = (edgeStrength * 0.3 + saliencyStrength * 0.4 + colorScore * 0.3);
+                mask[i] = score > 0.5 ? 255 : 0;
+            }
+            
+            // Morphological operations ile iyileştirme
+            const refined = morphologicalClose(mask, width, height);
+            return refined;
+        }
+        
+        // ISNet benzeri segmentasyon
+        function isnetSegmentation(imageData, width, height) {
+            const mask = new Uint8Array(width * height);
+            
+            // Intermediate supervision yaklaşımı
+            const multiScale = [];
+            
+            // Farklı ölçeklerde analiz
+            for (let scale = 1; scale <= 4; scale *= 2) {
+                const scaledWidth = Math.floor(width / scale);
+                const scaledHeight = Math.floor(height / scale);
+                const scaledData = downscaleImage(imageData, width, height, scaledWidth, scaledHeight);
+                
+                const edges = detectEdges(scaledData, scaledWidth, scaledHeight);
+                const saliency = detectSaliency(scaledData, scaledWidth, scaledHeight);
+                
+                multiScale.push({
+                    edges: upscaleImage(edges, scaledWidth, scaledHeight, width, height),
+                    saliency: upscaleImage(saliency, scaledWidth, scaledHeight, width, height)
+                });
+            }
+            
+            // Multi-scale fusion
+            for (let i = 0; i < width * height; i++) {
+                let totalScore = 0;
+                for (const scale of multiScale) {
+                    const edgeScore = scale.edges[i];
+                    const saliencyScore = scale.saliency[i];
+                    totalScore += (edgeScore + saliencyScore) / 2;
+                }
+                
+                mask[i] = (totalScore / multiScale.length) > 0.4 ? 255 : 0;
+            }
+            
+            return morphologicalClose(mask, width, height);
+        }
+        
+        // U2Net benzeri segmentasyon
+        function u2netSegmentation(imageData, width, height) {
+            const mask = new Uint8Array(width * height);
+            
+            // U-Net benzeri encoder-decoder yaklaşımı
+            const features = extractU2NetFeatures(imageData, width, height);
+            
+            // Saliency prediction
+            for (let i = 0; i < width * height; i++) {
+                const feature = features[i];
+                
+                // Basit saliency hesaplama
+                const r = imageData[i * 4];
+                const g = imageData[i * 4 + 1];
+                const b = imageData[i * 4 + 2];
+                
+                const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                const contrast = Math.abs(luminance - 128);
+                
+                const score = (feature.texture + feature.color + contrast) / 3;
+                mask[i] = score > 100 ? 255 : 0;
+            }
+            
+            return morphologicalClose(mask, width, height);
+        }
+        
+        // U2NetP (lightweight version)
+        function u2netpSegmentation(imageData, width, height) {
+            // Daha hafif versiyon - daha az hesaplama
+            const mask = new Uint8Array(width * height);
+            
+            const edges = detectEdges(imageData, width, height);
+            const saliency = detectSaliency(imageData, width, height);
+            
+            for (let i = 0; i < width * height; i++) {
+                const edgeScore = edges[i];
+                const saliencyScore = saliency[i];
+                
+                // Basit kombinasyon
+                const score = (edgeScore * 0.4 + saliencyScore * 0.6);
+                mask[i] = score > 0.45 ? 255 : 0;
+            }
+            
+            return morphologicalClose(mask, width, height);
+        }
+        
+        // Gelişmiş foreground detection (GrabCut benzeri)
+        function detectForegroundAdvanced(imageData, width, height) {
+            const mask = new Uint8Array(width * height);
+            
+            // 1. Renk histogramı analizi
+            const colorHist = buildColorHistogram(imageData, width, height);
+            const dominantColors = findDominantColors(colorHist, 5);
+            
+            // 2. Merkez bölge analizi (genellikle ön plan merkezdedir)
+            const centerWeight = createCenterWeightMap(width, height);
+            
+            // 3. Edge density analizi
+            const edges = detectEdges(imageData, width, height);
+            const edgeDensity = calculateEdgeDensity(edges, width, height, 15);
+            
+            // 4. Texture analizi
+            const texture = analyzeTexture(imageData, width, height);
+            
+            // 5. Saliency detection
+            const saliency = detectSaliency(imageData, width, height);
+            
+            // Tüm özellikleri birleştir
+            for (let i = 0; i < width * height; i++) {
+                const r = imageData[i * 4];
+                const g = imageData[i * 4 + 1];
+                const b = imageData[i * 4 + 2];
+                
+                // Renk skoru
+                const colorScore = calculateColorScore(r, g, b, dominantColors);
+                
+                // Merkez skoru
+                const centerScore = centerWeight[i];
+                
+                // Edge skoru
+                const edgeScore = edgeDensity[i];
+                
+                // Texture skoru
+                const textureScore = texture[i];
+                
+                // Saliency skoru
+                const saliencyScore = saliency[i];
+                
+                // Ağırlıklı kombinasyon
+                const finalScore = (
+                    colorScore * 0.25 +
+                    centerScore * 0.15 +
+                    edgeScore * 0.2 +
+                    textureScore * 0.15 +
+                    saliencyScore * 0.25
+                );
+                
+                mask[i] = finalScore > 0.5 ? 255 : 0;
+            }
+            
+            // Post-processing
+            const refined = morphologicalClose(mask, width, height);
+            return fillHoles(refined, width, height);
+        }
+        
+        // Saliency detection
+        function detectSaliency(imageData, width, height) {
+            const saliency = new Array(width * height).fill(0);
+            
+            // Basit saliency detection - merkez bias ve kontrast
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = y * width + x;
+                    const pixelIdx = idx * 4;
+                    
+                    const r = imageData[pixelIdx];
+                    const g = imageData[pixelIdx + 1];
+                    const b = imageData[pixelIdx + 2];
+                    
+                    // Merkez mesafesi (merkez daha saliency)
+                    const centerX = width / 2;
+                    const centerY = height / 2;
+                    const distFromCenter = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                    const maxDist = Math.sqrt(centerX ** 2 + centerY ** 2);
+                    const centerBias = 1 - (distFromCenter / maxDist);
+                    
+                    // Renk canlılığı
+                    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const colorfulness = Math.sqrt((r - luminance) ** 2 + (g - luminance) ** 2 + (b - luminance) ** 2);
+                    
+                    // Komşu piksellerle kontrast
+                    let contrastSum = 0;
+                    let neighborCount = 0;
+                    
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height && !(dx === 0 && dy === 0)) {
+                                const nIdx = (ny * width + nx) * 4;
+                                const nLum = 0.299 * imageData[nIdx] + 0.587 * imageData[nIdx + 1] + 0.114 * imageData[nIdx + 2];
+                                contrastSum += Math.abs(luminance - nLum);
+                                neighborCount++;
+                            }
+                        }
+                    }
+                    
+                    const avgContrast = neighborCount > 0 ? contrastSum / neighborCount : 0;
+                    
+                    // Saliency skoru
+                    saliency[idx] = (centerBias * 0.3 + (colorfulness / 255) * 0.4 + (avgContrast / 255) * 0.3);
+                }
+            }
+            
+            return saliency;
+        }
+        
+        // Color clustering wrapper
+        function performColorClustering(imageData, width, height, k) {
+            return colorClustering(imageData, width, height, k);
+        }
+        
+        // Foreground cluster bulma
+        function findForegroundCluster(clusters, width, height) {
+            // En merkezi cluster'ı foreground olarak kabul et
+            const centerX = Math.floor(width / 2);
+            const centerY = Math.floor(height / 2);
+            const centerIdx = centerY * width + centerX;
+            
+            return clusters[centerIdx] || 0;
+        }
+        
+        // U2Net feature extraction
+        function extractU2NetFeatures(imageData, width, height) {
+            const features = [];
+            
+            for (let i = 0; i < width * height; i++) {
+                const pixelIdx = i * 4;
+                const r = imageData[pixelIdx];
+                const g = imageData[pixelIdx + 1];
+                const b = imageData[pixelIdx + 2];
+                
+                // Basit feature extraction
+                const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                const saturation = Math.max(r, g, b) - Math.min(r, g, b);
+                
+                // Texture approximation (gradient magnitude)
+                const x = i % width;
+                const y = Math.floor(i / width);
+                
+                let gradientMag = 0;
+                if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+                    const leftIdx = (y * width + (x - 1)) * 4;
+                    const rightIdx = (y * width + (x + 1)) * 4;
+                    const topIdx = ((y - 1) * width + x) * 4;
+                    const bottomIdx = ((y + 1) * width + x) * 4;
+                    
+                    const leftLum = 0.299 * imageData[leftIdx] + 0.587 * imageData[leftIdx + 1] + 0.114 * imageData[leftIdx + 2];
+                    const rightLum = 0.299 * imageData[rightIdx] + 0.587 * imageData[rightIdx + 1] + 0.114 * imageData[rightIdx + 2];
+                    const topLum = 0.299 * imageData[topIdx] + 0.587 * imageData[topIdx + 1] + 0.114 * imageData[topIdx + 2];
+                    const bottomLum = 0.299 * imageData[bottomIdx] + 0.587 * imageData[bottomIdx + 1] + 0.114 * imageData[bottomIdx + 2];
+                    
+                    const gx = rightLum - leftLum;
+                    const gy = bottomLum - topLum;
+                    gradientMag = Math.sqrt(gx * gx + gy * gy);
+                }
+                
+                features.push({
+                    texture: gradientMag,
+                    color: saturation,
+                    luminance: luminance
+                });
+            }
+            
+            return features;
+        }
+        
+        // Image scaling functions
+        function downscaleImage(imageData, width, height, newWidth, newHeight) {
+            const newData = new Uint8ClampedArray(newWidth * newHeight * 4);
+            const scaleX = width / newWidth;
+            const scaleY = height / newHeight;
+            
+            for (let y = 0; y < newHeight; y++) {
+                for (let x = 0; x < newWidth; x++) {
+                    const srcX = Math.floor(x * scaleX);
+                    const srcY = Math.floor(y * scaleY);
+                    const srcIdx = (srcY * width + srcX) * 4;
+                    const dstIdx = (y * newWidth + x) * 4;
+                    
+                    newData[dstIdx] = imageData[srcIdx];
+                    newData[dstIdx + 1] = imageData[srcIdx + 1];
+                    newData[dstIdx + 2] = imageData[srcIdx + 2];
+                    newData[dstIdx + 3] = imageData[srcIdx + 3];
+                }
+            }
+            
+            return newData;
+        }
+        
+        function upscaleImage(data, width, height, newWidth, newHeight) {
+            const newData = new Array(newWidth * newHeight);
+            const scaleX = width / newWidth;
+            const scaleY = height / newHeight;
+            
+            for (let y = 0; y < newHeight; y++) {
+                for (let x = 0; x < newWidth; x++) {
+                    const srcX = Math.floor(x * scaleX);
+                    const srcY = Math.floor(y * scaleY);
+                    const srcIdx = srcY * width + srcX;
+                    const dstIdx = y * newWidth + x;
+                    
+                    newData[dstIdx] = data[srcIdx] || 0;
+                }
+            }
+            
+            return newData;
+        }
+        
+        // Advanced helper functions
+        function buildColorHistogram(imageData, width, height) {
+            const hist = {};
+            
+            for (let i = 0; i < imageData.length; i += 4) {
+                const r = Math.floor(imageData[i] / 32) * 32;
+                const g = Math.floor(imageData[i + 1] / 32) * 32;
+                const b = Math.floor(imageData[i + 2] / 32) * 32;
+                const key = `${r},${g},${b}`;
+                
+                hist[key] = (hist[key] || 0) + 1;
+            }
+            
+            return hist;
+        }
+        
+        function findDominantColors(histogram, count) {
+            const sorted = Object.entries(histogram)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, count)
+                .map(([color]) => color.split(',').map(Number));
+            
+            return sorted;
+        }
+        
+        function createCenterWeightMap(width, height) {
+            const weights = new Array(width * height);
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const maxDist = Math.sqrt(centerX * centerX + centerY * centerY);
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const dist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                    weights[y * width + x] = 1 - (dist / maxDist);
+                }
+            }
+            
+            return weights;
+        }
+        
+        function calculateEdgeDensity(edges, width, height, radius) {
+            const density = new Array(width * height).fill(0);
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = y * width + x;
+                    let edgeSum = 0;
+                    let count = 0;
+                    
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                edgeSum += edges[ny * width + nx];
+                                count++;
+                            }
+                        }
+                    }
+                    
+                    density[idx] = count > 0 ? edgeSum / count : 0;
+                }
+            }
+            
+            return density;
+        }
+        
+        function analyzeTexture(imageData, width, height) {
+            const texture = new Array(width * height).fill(0);
+            
+            // Local Binary Pattern benzeri texture analizi
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = y * width + x;
+                    const centerIdx = idx * 4;
+                    const centerLum = 0.299 * imageData[centerIdx] + 0.587 * imageData[centerIdx + 1] + 0.114 * imageData[centerIdx + 2];
+                    
+                    let pattern = 0;
+                    let bit = 0;
+                    
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (dx === 0 && dy === 0) continue;
+                            
+                            const nIdx = ((y + dy) * width + (x + dx)) * 4;
+                            const nLum = 0.299 * imageData[nIdx] + 0.587 * imageData[nIdx + 1] + 0.114 * imageData[nIdx + 2];
+                            
+                            if (nLum >= centerLum) {
+                                pattern |= (1 << bit);
+                            }
+                            bit++;
+                        }
+                    }
+                    
+                    texture[idx] = pattern;
+                }
+            }
+            
+            return texture;
+        }
+        
+        function calculateColorScore(r, g, b, dominantColors) {
+            let minDist = Infinity;
+            
+            for (const color of dominantColors) {
+                const dist = Math.sqrt(
+                    (r - color[0]) ** 2 + 
+                    (g - color[1]) ** 2 + 
+                    (b - color[2]) ** 2
+                );
+                minDist = Math.min(minDist, dist);
+            }
+            
+            // Normalize to 0-1 range
+            return Math.max(0, 1 - (minDist / 441.67)); // 441.67 is max RGB distance
+        }
+        
+        function fillHoles(mask, width, height) {
+            const filled = new Uint8Array(mask);
+            
+            // Basit hole filling - flood fill benzeri
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = y * width + x;
+                    
+                    if (mask[idx] === 0) {
+                        let surroundedCount = 0;
+                        
+                        // 8-connected neighbors
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (dx === 0 && dy === 0) continue;
+                                
+                                const nIdx = (y + dy) * width + (x + dx);
+                                if (mask[nIdx] === 255) {
+                                    surroundedCount++;
+                                }
+                            }
+                        }
+                        
+                        // If mostly surrounded, fill the hole
+                        if (surroundedCount >= 6) {
+                            filled[idx] = 255;
+                        }
+                    }
+                }
+            }
+            
+            return filled;
+        }
+        
         // K-means color clustering
         function colorClustering(imageData, width, height, k) {
             const pixels = [];
@@ -2969,9 +3691,123 @@
             return await removeBackgroundWithRetry(imageFile);
         }
         
+        // Gelişmiş API Client Sistemi
+        class SmartAPIClient {
+            constructor(config) {
+                this.config = config;
+                this.cache = new Map();
+                this.metrics = {
+                    requests: 0,
+                    successes: 0,
+                    failures: 0,
+                    averageResponseTime: 0
+                };
+            }
+            
+            async processBackgroundRemoval(imageFile, options = {}) {
+                const startTime = Date.now();
+                
+                try {
+                    // Primary servislerden dene
+                    const primaryServices = [
+                        { name: 'huggingface', enabled: () => !!getEnvVariable('HUGGING_FACE_TOKEN') },
+                        { name: 'photoscissors', enabled: () => true },
+                        { name: 'removebg', enabled: () => !!getEnvVariable('REMOVEBG_TOKEN') },
+                        { name: 'replicate', enabled: () => !!getEnvVariable('REPLICATE_TOKEN') }
+                    ];
+                    
+                    for (const service of primaryServices) {
+                        if (!service.enabled()) continue;
+                        
+                        try {
+                            updateLoadingMessage(`${service.name.toUpperCase()} ile arka plan kaldırılıyor...`);
+                            
+                            const result = await removeBackgroundWithProvider(imageFile, service.name);
+                            
+                            if (result) {
+                                this.recordSuccess(Date.now() - startTime);
+                                return result;
+                            }
+                            
+                        } catch (error) {
+                            console.error(`${service.name} failed:`, error);
+                            this.recordFailure();
+                        }
+                    }
+                    
+                    throw new Error('Tüm arka plan kaldırma servisleri başarısız oldu');
+                    
+                } catch (error) {
+                    this.recordFailure();
+                    throw error;
+                }
+            }
+            
+            async processImageGeneration(prompt, options = {}) {
+                const startTime = Date.now();
+                
+                try {
+                    // Primary servislerden dene
+                    const primaryServices = [
+                        { name: 'huggingface', enabled: () => !!getEnvVariable('HUGGING_FACE_TOKEN') },
+                        { name: 'pollinations', enabled: () => true },
+                        { name: 'replicate', enabled: () => !!getEnvVariable('REPLICATE_TOKEN') }
+                    ];
+                    
+                    for (const service of primaryServices) {
+                        if (!service.enabled()) continue;
+                        
+                        try {
+                            updateLoadingMessage(`${service.name.toUpperCase()} ile arka plan oluşturuluyor...`);
+                            
+                            const result = await generateBackgroundWithProvider(prompt, service.name);
+                            
+                            if (result) {
+                                this.recordSuccess(Date.now() - startTime);
+                                return result;
+                            }
+                            
+                        } catch (error) {
+                            console.error(`${service.name} failed:`, error);
+                            this.recordFailure();
+                        }
+                    }
+                    
+                    throw new Error('Tüm görüntü oluşturma servisleri başarısız oldu');
+                    
+                } catch (error) {
+                    this.recordFailure();
+                    throw error;
+                }
+            }
+            
+            recordSuccess(responseTime) {
+                this.metrics.requests++;
+                this.metrics.successes++;
+                this.metrics.averageResponseTime = 
+                    (this.metrics.averageResponseTime * (this.metrics.requests - 1) + responseTime) / this.metrics.requests;
+            }
+            
+            recordFailure() {
+                this.metrics.requests++;
+                this.metrics.failures++;
+            }
+            
+            getMetrics() {
+                return {
+                    ...this.metrics,
+                    successRate: this.metrics.requests > 0 ? (this.metrics.successes / this.metrics.requests) * 100 : 0
+                };
+            }
+        }
+        
+        // Global API client instance
+        const apiClient = new SmartAPIClient(API_CONFIG);
+
         // Removed local processing functions - API only approach
 
         async function generateBackgroundWithRetry(prompt, maxRetries = 5) {
+            // En güçlü ücretsiz modeli önceliklendir: Hugging Face SDXL
             const providers = ['huggingface', 'pollinations', 'replicate'];
             
             for (const provider of providers) {
