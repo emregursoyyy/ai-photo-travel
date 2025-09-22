@@ -1468,6 +1468,62 @@
             // Post-processing: Morphological operations
             return morphologicalClose(mask, width, height);
         }
+        
+        // Morphological closing operation
+        function morphologicalClose(mask, width, height) {
+            // Dilation + Erosion
+            const dilated = morphologicalDilate(mask, width, height);
+            return morphologicalErode(dilated, width, height);
+        }
+        
+        function morphologicalDilate(mask, width, height) {
+            const result = new Array(width * height).fill(false);
+            
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = y * width + x;
+                    
+                    // 3x3 kernel
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (mask[(y + dy) * width + (x + dx)]) {
+                                result[idx] = true;
+                                break;
+                            }
+                        }
+                        if (result[idx]) break;
+                    }
+                }
+            }
+            
+            return result;
+        }
+        
+        function morphologicalErode(mask, width, height) {
+            const result = new Array(width * height).fill(false);
+            
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = y * width + x;
+                    
+                    let allTrue = true;
+                    // 3x3 kernel
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (!mask[(y + dy) * width + (x + dx)]) {
+                                allTrue = false;
+                                break;
+                            }
+                        }
+                        if (!allTrue) break;
+                    }
+                    
+                    result[idx] = allTrue;
+                }
+            }
+            
+            return result;
+        }
 
         // Edge detection (basitleştirilmiş Sobel)
         function detectEdges(imageData, width, height) {
