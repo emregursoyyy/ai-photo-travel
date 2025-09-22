@@ -1,6 +1,7 @@
 // Build script for Cloudflare Pages deployment
 // This script injects environment variables into the HTML file
 
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 

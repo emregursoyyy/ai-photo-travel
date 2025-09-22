@@ -758,10 +758,18 @@
             providers: {
                 huggingface: {
                     token: getEnvVariable('HUGGING_FACE_TOKEN'),
-                    backgroundRemovalModel: 'briaai/RMBG-1.4',
-                    imageGenerationModel: 'runwayml/stable-diffusion-v1-5',
+                    // RMBG-2.0 - 2025'in en güçlü modeli (BiRefNet tabanlı)
+                    backgroundRemovalModel: 'briaai/RMBG-2.0',
+                    // Fallback modeller - performans sırasına göre
+                    fallbackModels: [
+                        'ZhengPeng7/BiRefNet',  // Açık kaynak SOTA
+                        'briaai/RMBG-1.4',      // Stabil versiyon
+                        'danielgatis/rembg-new' // Rembg'nin yeni versiyonu
+                    ],
+                    imageGenerationModel: 'stabilityai/stable-diffusion-xl-base-1.0',
                     baseUrl: 'https://api-inference.huggingface.co/models/',
-                    enabled: !!getEnvVariable('HUGGING_FACE_TOKEN')
+                    enabled: true,  // Token olmasa bile bazı modeller ücretsiz
+                    priority: 1
                 },
                 replicate: {
                     token: getEnvVariable('REPLICATE_TOKEN') || '',

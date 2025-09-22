@@ -42,5 +42,8 @@
     "last 2 versions",
     "not dead",
     "not ie <= 11"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^17.2.2"
+  }
 }
