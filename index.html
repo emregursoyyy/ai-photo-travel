@@ -733,10 +733,10 @@
             
             // Check if variables are injected via build process (Cloudflare Pages)
             const envVars = {
-                HUGGING_FACE_TOKEN: '',
-                REPLICATE_TOKEN: '',
-                REMOVEBG_TOKEN: '',
-                PHOTOROOM_TOKEN: ''
+                HUGGING_FACE_TOKEN: '{{HUGGING_FACE_TOKEN}}',
+                REPLICATE_TOKEN: '{{REPLICATE_TOKEN}}',
+                REMOVEBG_TOKEN: '{{REMOVEBG_TOKEN}}',
+                PHOTOROOM_TOKEN: '{{PHOTOROOM_TOKEN}}'
             };
             
             // If template variable is replaced with actual value, use it
@@ -758,7 +758,7 @@
             providers: {
                 huggingface: {
                     token: getEnvVariable('HUGGING_FACE_TOKEN'),
-                    backgroundRemovalModel: 'briaai/RMBG-1.4',
+                    backgroundRemovalModel: 'briaai/RMBG-2.0',
                     imageGenerationModel: 'runwayml/stable-diffusion-v1-5',
                     baseUrl: 'https://api-inference.huggingface.co/models/',
                     enabled: !!getEnvVariable('HUGGING_FACE_TOKEN')

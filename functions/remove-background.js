@@ -151,7 +151,7 @@ async function removeBackgroundReplicate(imageFile, apiKey, model = 'rmbg-2.0') 
 // Provider: Hugging Face
 async function removeBackgroundHuggingFace(imageFile, apiKey) {
     if (!apiKey) throw new Error('Hugging Face API key is not set.');
-    const apiUrl = 'https://api-inference.huggingface.co/models/briaai/RMBG-1.4';
+    const apiUrl = 'https://api-inference.huggingface.co/models/briaai/RMBG-2.0';
     
     const response = await fetchWithTimeout(apiUrl, {
         method: 'POST',
