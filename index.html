@@ -1396,32 +1396,29 @@
         
         // Hugging Face ile spesifik model kullanma
         async function removeBackgroundHuggingFaceWithModel(imageFile, config, modelName) {
-            if (!config.token && !modelName.includes('briaai')) {
-                // Token gerektiren modeller için
-                throw new Error('Hugging Face token gerekli');
-            }
+            // 2025 güncellemesi: Cloudflare Pages Functions kullanarak güvenli API çağrısı
+            // Environment değişkenleri client-side'da erişilemez, server-side proxy gerekli
             
             const formData = new FormData();
-            formData.append('inputs', imageFile);
+            formData.append('image', imageFile instanceof File ? imageFile : await fetch(imageFile).then(r => r.blob()));
+            formData.append('model', modelName);
             
             const timeoutId = setTimeout(() => {
                 throw new Error('Hugging Face API timeout');
             }, API_CONFIG.timeout);
             
             try {
-                const response = await fetch(`${config.baseUrl}${modelName}`, {
+                // Pages Function endpoint'ine istek gönder
+                const response = await fetch('/api/huggingface', {
                     method: 'POST',
-                    headers: config.token ? {
-                        'Authorization': `Bearer ${config.token}`
-                    } : {},
-                    body: imageFile instanceof File ? imageFile : await fetch(imageFile).then(r => r.blob())
+                    body: formData
                 });
                 
                 clearTimeout(timeoutId);
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Hugging Face API error (${modelName}): ${response.status} - ${errorText}`);
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(`Hugging Face API error (${modelName}): ${response.status} - ${errorData.error || errorData.details || 'Unknown error'}`);
                 }
                 
                 const blob = await response.blob();
